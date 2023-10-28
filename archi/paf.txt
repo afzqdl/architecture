@@ -1,0 +1,58 @@
+管道-过滤软件体系结构的基本原理是将系统分解为多个独立的过滤器，每个过滤器负责特定的处理任务，并通过管道将数据流从一个过滤器传递到另一个过滤器。
+
+管道-过滤软件体系结构的基本原理包括以下几个方面：
+1、过滤器：过滤器是系统中的基本组成部分，它接收输入数据，经过处理后输出结果。每个过滤器都是独立的，可以被重用和组合，以实现不同的功能。
+2、管道：管道是过滤器之间传递数据的通道。它可以是内存缓冲区、文件、网络连接等，用于传递过滤器之间的数据流。管道可以保证数据的顺序性和完整性，以及支持异步处理和流式处理。
+3、输入和输出：输入和输出是过滤器与外部环境交互的接口。输入可以是来自用户、设备或其他系统的数据，输出可以是生成的结果、状态信息或错误信息。
+4、组合：组合是将多个过滤器组合在一起形成一个完整的系统。通过组合不同的过滤器，可以实现不同的功能和处理流程。组合可以基于管道连接，也可以基于输入和输出接口进行协作。
+
+这种设计方法有助于实现模块化、可重用和可扩展的系统，同时支持异步处理和流式处理。它可以应用于各种类型的系统，如数据处理、网络通信、图像处理等。
+
+代码结构：
+1、过滤器接口（Filter）：定义了过滤器的基本方法和行为。
+2、过滤器实现类：实现了过滤器接口，并提供了具体的处理逻辑。
+3、管道（Pipe）：负责在过滤器之间传递数据流，并调用过滤器的处理方法。
+4、数据类：表示需要处理的数据。
+5、主程序：创建过滤器和管道对象，并进行数据处理。
+
+关键代码：
+public abstract class Filter {
+    protected Pipe input;
+    protected Pipe output;
+
+    public Filter(Pipe input, Pipe output) {
+        this.input = input;
+        this.output = output;
+    }
+    protected abstract void transform() throws IOException;
+}
+public class Pipe {
+    private Scanner pipeReader;
+    private PrintWriter pipeWriter;
+    Pipe(){
+        PipedWriter pipedWriter = new PipedWriter();
+        PipedReader pipedReader = new PipedReader();
+        try {
+            pipedWriter.connect(pipedReader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        pipeReader = new Scanner(pipedReader);
+        pipeWriter = new PrintWriter(pipedWriter);
+    }
+    public String readerLine(){
+        return pipeReader.nextLine();
+    }
+    public boolean hashNextLine(){
+        return pipeReader.hasNext();
+    }
+    public void writerLine(String strLine){
+        pipeWriter.println(strLine);
+    }
+    public void closeReader(){
+        pipeReader.close();
+    }
+    public void closeWriter(){
+        pipeWriter.close();
+    }
+}
